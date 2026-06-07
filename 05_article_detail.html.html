@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ジブンゼミ｜記事詳細</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F4F4F5;
+    --accent: #F8D423;
+    --accent-press: #E8C40F;
+    --navy: #1A3A6B;
+    --ink: #1F1F1F;
+    --white: #FFFFFF;
+    --muted: #6B6B70;
+    --line: #E4E4E7;
+    --field: #FAFAFA;
+    --radius: 12px;
+    --shadow: 0 4px 16px rgba(0,0,0,0.12);
+    --ok: #1F8A5B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Noto Sans JP", sans-serif;
+    background: var(--bg); color: var(--ink);
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  }
+  #root { min-height: 100%; }
+  a { color: inherit; }
+
+  /* ── Nav ── */
+  .nav {
+    height: 60px; background: var(--navy);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; position: sticky; top: 0; z-index: 30;
+  }
+  .nav .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark {
+    width: 28px; height: 28px; border-radius: 7px; background: var(--accent);
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+  .brand-mark span { font-weight: 900; font-size: 16px; color: var(--navy); line-height: 1; }
+  .nav .brand-name { color: var(--white); font-weight: 700; font-size: 17px; letter-spacing: 0.04em; }
+  .nav-right { display: flex; align-items: center; gap: 6px; }
+  .nav-link {
+    color: rgba(255,255,255,0.82); font-size: 13px; font-weight: 700;
+    text-decoration: none; padding: 8px 13px; border-radius: 8px;
+    display: flex; align-items: center; gap: 7px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .nav-link:hover { color: var(--white); background: rgba(255,255,255,0.10); }
+  .nav-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--accent); color: var(--navy);
+    display: grid; place-items: center; font-weight: 900; font-size: 13px; margin-left: 4px;
+  }
+
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 22px 24px 64px; }
+
+  /* ── Breadcrumb ── */
+  .crumb { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); margin-bottom: 22px; flex-wrap: wrap; }
+  .crumb a { text-decoration: none; font-weight: 500; transition: color 0.15s; }
+  .crumb a:hover { color: var(--ink); }
+  .crumb .sep { color: var(--line); }
+  .crumb .current { color: var(--ink); font-weight: 700; }
+
+  /* ── Layout ── */
+  .layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+
+  /* ── Main ── */
+  .main-card {
+    background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+  }
+  .thumb {
+    background: var(--field); position: relative; overflow: hidden;
+    display: grid; place-items: center; min-height: 280px;
+  }
+  .thumb .ph-stripes { position: absolute; inset: 0; opacity: 0.5; }
+  .thumb .ph-label {
+    position: relative; font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px; color: var(--muted); background: rgba(255,255,255,0.85);
+    padding: 5px 10px; border-radius: 6px; letter-spacing: 0.02em;
+  }
+  .article-head { padding: 26px 30px 30px; }
+  .tagrow { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .cat-tag { font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 6px; letter-spacing: 0.02em; }
+  .cat-self { background: rgba(248,212,35,0.22); color: #8a7000; }
+  .date { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+  h1.title { font-size: 27px; font-weight: 900; line-height: 1.45; letter-spacing: 0.01em; margin-bottom: 18px; text-wrap: pretty; }
+  .lead {
+    font-size: 14.5px; line-height: 1.95; color: #3a3a40;
+    padding: 18px 20px; background: var(--field); border-radius: 10px;
+    border-left: 4px solid var(--accent);
+  }
+
+  /* ── Meta strip ── */
+  .meta-strip { display: flex; gap: 22px; padding: 18px 30px; border-top: 1px solid var(--line); }
+  .meta-strip .m { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+  .meta-strip .m b { color: var(--ink); font-weight: 700; }
+  .meta-strip .m .mi { color: var(--navy); }
+
+  /* ── Action panel (CTA hero) ── */
+  .aside { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 16px; }
+  .cta-card {
+    background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 24px 22px; text-align: center;
+  }
+  .cta-eyebrow { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+  .cta-eyebrow b { color: var(--ink); }
+  .cta-note-logo {
+    display: inline-flex; align-items: center; gap: 7px; margin-bottom: 18px;
+    font-size: 12.5px; color: var(--muted);
+  }
+  .note-chip {
+    width: 26px; height: 26px; border-radius: 6px; border: 1.5px solid var(--ink);
+    display: grid; place-items: center; font-weight: 900; font-size: 12px; color: var(--ink);
+  }
+  .btn-note {
+    width: 100%; font-family: inherit; font-size: 18px; font-weight: 900; color: var(--ink);
+    background: var(--accent); border: none; border-radius: 12px; padding: 19px;
+    cursor: pointer; letter-spacing: 0.03em;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    box-shadow: 0 6px 18px rgba(248,212,35,0.5);
+    transition: background 0.16s, transform 0.08s, box-shadow 0.16s;
+  }
+  .btn-note:hover { background: var(--accent-press); box-shadow: 0 9px 24px rgba(248,212,35,0.6); transform: translateY(-1px); }
+  .btn-note:active { transform: translateY(1px); box-shadow: 0 3px 10px rgba(248,212,35,0.5); }
+  .cta-sub {
+    margin-top: 13px; font-size: 12.5px; color: var(--muted); font-weight: 500;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .cta-sub .heart { color: #e0556b; }
+
+  .cta-divider { height: 1px; background: var(--line); margin: 20px 0 18px; }
+
+  .sub-actions { display: flex; flex-direction: column; gap: 10px; }
+  .btn-sub {
+    font-family: inherit; font-size: 13.5px; font-weight: 700; color: var(--ink);
+    background: var(--white); border: 1.5px solid var(--line); border-radius: 10px; padding: 13px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.16s;
+  }
+  .btn-sub:hover { border-color: var(--muted); background: var(--field); }
+  .btn-sub.done {
+    background: var(--ok); border-color: var(--ok); color: var(--white);
+  }
+  .btn-sub.done:hover { background: #1a754d; }
+  .btn-sub.saved {
+    background: rgba(248,212,35,0.18); border-color: var(--accent); color: #7d6500;
+  }
+  .btn-sub .ic { display: grid; place-items: center; }
+
+  /* ── PDF worksheet ── */
+  .section { margin-top: 30px; }
+  .sec-head h2 { font-size: 17px; font-weight: 900; display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
+  .sec-head h2 .tick { width: 5px; height: 18px; background: var(--accent); border-radius: 2px; display: inline-block; }
+  .pdf-card {
+    background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 18px 20px; display: flex; align-items: center; gap: 16px;
+  }
+  .pdf-card + .pdf-card { margin-top: 12px; }
+  .pdf-icon {
+    width: 48px; height: 56px; border-radius: 8px; flex-shrink: 0;
+    background: rgba(192,57,43,0.10); color: #C0392B;
+    display: grid; place-items: center; position: relative;
+    border: 1.5px solid rgba(192,57,43,0.2);
+  }
+  .pdf-icon .ext { position: absolute; bottom: 6px; font-size: 8px; font-weight: 900; letter-spacing: 0.04em; }
+  .pdf-body { flex: 1; }
+  .pdf-body h3 { font-size: 14.5px; font-weight: 700; margin-bottom: 4px; }
+  .pdf-body p { font-size: 12px; color: var(--muted); line-height: 1.55; }
+  .pdf-meta { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .btn-dl {
+    font-family: inherit; font-size: 13px; font-weight: 700; color: var(--ink);
+    background: var(--white); border: 1.5px solid var(--line); border-radius: 9px;
+    padding: 11px 16px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    display: flex; align-items: center; gap: 7px; transition: all 0.16s;
+  }
+  .btn-dl:hover { border-color: var(--navy); background: var(--field); color: var(--navy); }
+
+  /* ── Related ── */
+  .rel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .card-art {
+    background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow);
+    overflow: hidden; cursor: pointer; display: flex; flex-direction: column;
+    transition: transform 0.12s, box-shadow 0.18s; border: 1.5px solid transparent;
+  }
+  .card-art:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(0,0,0,0.14); border-color: rgba(248,212,35,0.6); }
+  .card-art .thumb { min-height: 110px; }
+  .card-art .thumb .ph-label { font-size: 9.5px; padding: 3px 7px; }
+  .card-body { padding: 14px 15px 16px; }
+  .card-body .cat-tag2 {
+    display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 5px; margin-bottom: 9px;
+  }
+  .cat-shukatsu { background: rgba(26,58,107,0.10); color: var(--navy); }
+  .cat-career { background: rgba(107,70,193,0.12); color: #5a37b0; }
+  .card-body h3 { font-size: 13.5px; font-weight: 700; line-height: 1.5; text-wrap: pretty; }
+
+  .foot { margin-top: 36px; font-size: 11px; color: #A0A0A6; text-align: center; letter-spacing: 0.02em; }
+
+  /* toast */
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
+    background: var(--navy); color: var(--white); font-size: 13px; font-weight: 500;
+    padding: 13px 22px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+    opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s; z-index: 50;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast .tk { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+
+  @media (max-width: 880px) {
+    .layout { grid-template-columns: 1fr; }
+    .aside { position: static; }
+    .rel-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 620px) {
+    .nav { padding: 0 16px; }
+    .nav-right .nav-link span.txt { display: none; }
+    .nav-link { padding: 8px; }
+    .wrap { padding: 18px 16px 52px; }
+    h1.title { font-size: 22px; }
+    .article-head { padding: 22px 20px 24px; }
+    .meta-strip { padding: 16px 20px; gap: 16px; flex-wrap: wrap; }
+    .thumb { min-height: 200px; }
+    .rel-grid { grid-template-columns: 1fr; }
+    .pdf-card { flex-wrap: wrap; }
+    .btn-dl { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+const { useState, useRef } = React;
+
+function Stripes({ seed = 0 }) {
+  const id = "s" + seed;
+  return (
+    <svg className="ph-stripes" width="100%" height="100%" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <pattern id={id} width="16" height="16" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+          <rect width="16" height="16" fill="#FAFAFA"/>
+          <line x1="0" y1="0" x2="0" y2="16" stroke="#E4E4E7" strokeWidth="8"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill={"url(#" + id + ")"}/>
+    </svg>
+  );
+}
+function Thumb({ label, seed }) {
+  return <div className="thumb"><Stripes seed={seed} /><span className="ph-label">{label}</span></div>;
+}
+
+const RELATED = [
+  { id: 1, cat: "shukatsu", label: "就活対策", title: "通過するガクチカの作り方｜結論ファーストの型", seed: 11 },
+  { id: 2, cat: "career", label: "キャリア設計", title: "20代でやっておくべきキャリアの棚卸し", seed: 12 },
+  { id: 3, cat: "shukatsu", label: "就活対策", title: "逆質問で差をつける面接の5つの質問", seed: 13 },
+];
+
+function App() {
+  const [done, setDone] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [toast, setToast] = useState("");
+  const toastTimer = useRef(null);
+
+  function flash(msg) {
+    setToast(msg);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(""), 2400);
+  }
+  function toggleDone() { setDone(d => { const nv = !d; flash(nv ? "読了済みにしました" : "未読に戻しました"); return nv; }); }
+  function toggleSave() { setSaved(s => { const nv = !s; flash(nv ? "マイリストに保存しました" : "保存を解除しました"); return nv; }); }
+
+  return (
+    <React.Fragment>
+      <nav className="nav">
+        <div className="brand">
+          <div className="brand-mark"><span>ジ</span></div>
+          <div className="brand-name">ジブンゼミ</div>
+        </div>
+        <div className="nav-right">
+          <a className="nav-link" href="#" onClick={e=>e.preventDefault()}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span className="txt">ホーム</span>
+          </a>
+          <a className="nav-link" href="#" onClick={e=>e.preventDefault()}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span className="txt">記事一覧</span>
+          </a>
+          <div className="nav-avatar">後</div>
+        </div>
+      </nav>
+
+      <div className="wrap">
+        <div className="crumb">
+          <a href="#" onClick={e=>e.preventDefault()}>ホーム</a>
+          <span className="sep">/</span>
+          <a href="#" onClick={e=>e.preventDefault()}>自己分析</a>
+          <span className="sep">/</span>
+          <span className="current">「やりたいこと」が見つからない人のための自己分析フレーム</span>
+        </div>
+
+        <div className="layout">
+          {/* Main */}
+          <div>
+            <article className="main-card">
+              <Thumb label="記事サムネイル" seed={1} />
+              <div className="article-head">
+                <div className="tagrow">
+                  <span className="cat-tag cat-self">自己分析</span>
+                  <span className="date">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    2026年6月5日 公開
+                  </span>
+                </div>
+                <h1 className="title">「やりたいこと」が見つからない人のための自己分析フレーム</h1>
+                <p className="lead">
+                  「やりたいことが分からない」のは、選択肢が少ないからではなく、自分の判断基準が言語化できていないから。この記事では、過去の経験から“心が動いた瞬間”を抽出し、3つの軸に整理するワークを紹介します。読み終える頃には、自分だけの選択基準が手に入ります。
+                </p>
+              </div>
+              <div className="meta-strip">
+                <div className="m"><span className="mi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>約 <b>8分</b> で読める</div>
+                <div className="m"><span className="mi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-8 10-8 10 8 10 8-3 8-10 8-10-8-10-8z"/><circle cx="12" cy="12" r="3"/></svg></span>note公開記事</div>
+              </div>
+            </article>
+
+            {/* PDF worksheet */}
+            <div className="section">
+              <div className="sec-head"><h2><span className="tick"></span>関連ワークシート</h2></div>
+              <div className="pdf-card">
+                <div className="pdf-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span className="ext">PDF</span>
+                </div>
+                <div className="pdf-body">
+                  <h3>心が動いた瞬間ワークシート</h3>
+                  <p>記事内で紹介する3軸整理を、書き込みながら進められるワークシートです。</p>
+                  <div className="pdf-meta">PDF・A4 2ページ・420KB</div>
+                </div>
+                <button className="btn-dl" onClick={() => flash("ダウンロードを開始しました（デモ）")}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  ダウンロード
+                </button>
+              </div>
+            </div>
+
+            {/* Related articles */}
+            <div className="section">
+              <div className="sec-head"><h2><span className="tick"></span>関連記事</h2></div>
+              <div className="rel-grid">
+                {RELATED.map(r => (
+                  <div className="card-art" key={r.id}>
+                    <Thumb label="サムネイル" seed={r.seed} />
+                    <div className="card-body">
+                      <span className={"cat-tag2 cat-" + r.cat}>{r.label}</span>
+                      <h3>{r.title}</h3>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Aside CTA */}
+          <aside className="aside">
+            <div className="cta-card">
+              <div className="cta-eyebrow">この記事の本文は <b>note</b> で公開中</div>
+              <div className="cta-note-logo">
+                <span className="note-chip">n</span>note で続きを読む
+              </div>
+              <button className="btn-note" onClick={() => flash("noteを開きます（デモ）")}>
+                noteで読む
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+              </button>
+              <div className="cta-sub">
+                <span className="heart">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </span>
+                いいねもぜひお願いします！
+              </div>
+
+              <div className="cta-divider"></div>
+
+              <div className="sub-actions">
+                <button className={"btn-sub" + (done ? " done" : "")} onClick={toggleDone}>
+                  <span className="ic">
+                    {done
+                      ? <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11.5 14.5 16 9.5"/></svg>}
+                  </span>
+                  {done ? "読了済み" : "読了済みにする"}
+                </button>
+                <button className={"btn-sub" + (saved ? " saved" : "")} onClick={toggleSave}>
+                  <span className="ic">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill={saved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                  </span>
+                  {saved ? "保存済み" : "保存する"}
+                </button>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <div className="foot">© 2026 ジブンゼミ　月額500円のキャリア支援サブスク</div>
+      </div>
+
+      <div className={"toast" + (toast ? " show" : "")}>
+        <span className="tk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1A3A6B" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        {toast}
+      </div>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

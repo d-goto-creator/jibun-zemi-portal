@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ジブンゼミ｜PDF管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F4F4F5;
+    --accent: #F8D423;
+    --accent-press: #E8C40F;
+    --navy: #1A3A6B;
+    --ink: #1F1F1F;
+    --white: #FFFFFF;
+    --muted: #6B6B70;
+    --line: #E4E4E7;
+    --field: #FAFAFA;
+    --radius: 12px;
+    --shadow: 0 4px 16px rgba(0,0,0,0.12);
+    --ok: #1F8A5B;
+    --danger: #C0392B;
+    --pdf: #C0392B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: "Noto Sans JP", sans-serif; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  #root { min-height: 100%; }
+
+  .shell { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar { background: var(--navy); color: var(--white); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+  .sb-brand { display: flex; align-items: center; gap: 11px; padding: 20px 22px; border-bottom: 1px solid rgba(255,255,255,0.10); }
+  .sb-brand .mark { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+  .sb-brand .mark span { font-weight: 900; font-size: 17px; color: var(--navy); }
+  .sb-brand .t { line-height: 1.2; }
+  .sb-brand .t .n { font-weight: 700; font-size: 15px; letter-spacing: 0.03em; }
+  .sb-brand .t .s { font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 700; letter-spacing: 0.08em; }
+  .sb-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 3px; }
+  .sb-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4); letter-spacing: 0.1em; padding: 10px 12px 6px; }
+  .sb-item { display: flex; align-items: center; gap: 12px; padding: 11px 13px; border-radius: 9px; color: rgba(255,255,255,0.78); font-size: 13.5px; font-weight: 700; cursor: pointer; border: none; background: none; font-family: inherit; text-align: left; width: 100%; transition: background 0.15s, color 0.15s; }
+  .sb-item:hover { background: rgba(255,255,255,0.08); color: var(--white); }
+  .sb-item.active { background: var(--accent); color: var(--ink); }
+  .sb-item .badge { margin-left: auto; font-size: 10.5px; font-weight: 900; background: var(--accent); color: var(--ink); min-width: 19px; height: 19px; padding: 0 5px; border-radius: 99px; display: grid; place-items: center; }
+  .sb-foot { padding: 14px; border-top: 1px solid rgba(255,255,255,0.10); }
+  .sb-user { display: flex; align-items: center; gap: 11px; padding: 8px 6px; }
+  .sb-user .av { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: var(--navy); display: grid; place-items: center; font-weight: 900; font-size: 14px; }
+  .sb-user .u { line-height: 1.3; }
+  .sb-user .u .un { font-size: 13px; font-weight: 700; }
+  .sb-user .u .ur { font-size: 10.5px; color: rgba(255,255,255,0.55); }
+
+  /* ── Main ── */
+  .main { padding: 26px 32px 48px; }
+  .topbar { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; gap: 16px; }
+  .topbar h1 { font-size: 23px; font-weight: 900; }
+  .topbar .sub { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .btn-add { font-family: inherit; font-size: 13.5px; font-weight: 900; color: var(--ink); background: var(--accent); border: none; border-radius: 10px; padding: 12px 18px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 3px 10px rgba(248,212,35,0.4); transition: all 0.15s; }
+  .btn-add:hover { background: var(--accent-press); box-shadow: 0 5px 14px rgba(248,212,35,0.5); }
+  .btn-add:active { transform: translateY(1px); }
+
+  .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+  .stat-line { font-size: 12.5px; color: var(--muted); }
+  .stat-line b { color: var(--ink); font-weight: 700; }
+  .search-wrap { position: relative; width: 280px; }
+  .search-wrap .s-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+  .search-input { width: 100%; font-family: inherit; font-size: 13.5px; color: var(--ink); background: var(--white); border: 1.5px solid var(--line); border-radius: 10px; padding: 11px 14px 11px 40px; transition: border-color 0.15s, box-shadow 0.15s; }
+  .search-input::placeholder { color: #B6B6BC; }
+  .search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(248,212,35,0.22); }
+
+  /* ── Table ── */
+  .panel { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { font-size: 11px; font-weight: 700; color: var(--muted); text-align: left; padding: 13px 18px; background: var(--field); letter-spacing: 0.03em; white-space: nowrap; border-bottom: 1px solid var(--line); }
+  tbody td { padding: 14px 18px; font-size: 13px; border-top: 1px solid var(--line); vertical-align: middle; }
+  tbody tr:hover { background: var(--field); }
+  .pdf-name-cell { display: flex; align-items: center; gap: 12px; min-width: 200px; }
+  .pdf-ic { width: 34px; height: 40px; border-radius: 6px; flex-shrink: 0; background: rgba(192,57,43,0.09); color: var(--pdf); border: 1.5px solid rgba(192,57,43,0.2); display: grid; place-items: center; position: relative; }
+  .pdf-ic .ext { position: absolute; bottom: 3px; font-size: 6.5px; font-weight: 900; }
+  .pdf-name { font-weight: 700; line-height: 1.4; }
+  .linked-cell { max-width: 200px; font-size: 12.5px; line-height: 1.45; }
+  .linked-cell .lc-in { display: flex; align-items: center; gap: 6px; }
+  .linked-cell .li { color: var(--navy); flex-shrink: 0; }
+  .linked-cell .lt { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .linked-cell.none { color: var(--line); }
+  .desc-cell { max-width: 220px; font-size: 12px; color: var(--muted); line-height: 1.5; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .gdrive-url { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11.5px; color: var(--navy); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; max-width: 150px; }
+  .gdrive-url:hover { text-decoration: underline; }
+  .gdrive-url .gt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .date-c { color: var(--muted); white-space: nowrap; }
+  .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+  .ab { font-family: inherit; font-size: 11.5px; font-weight: 700; border-radius: 7px; padding: 7px 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.15s; border: 1.5px solid var(--line); background: var(--white); white-space: nowrap; }
+  .ab.edit { color: var(--navy); }
+  .ab.edit:hover { border-color: var(--navy); background: var(--field); }
+  .ab.del { color: var(--danger); }
+  .ab.del:hover { border-color: var(--danger); background: #FDF3F2; }
+  .empty-row td { text-align: center; color: var(--muted); padding: 40px; font-size: 13px; }
+
+  /* ── Modal ── */
+  .overlay { position: fixed; inset: 0; background: rgba(20,30,50,0.42); opacity: 0; pointer-events: none; transition: opacity 0.22s; z-index: 40; display: grid; place-items: center; padding: 24px; }
+  .overlay.show { opacity: 1; pointer-events: auto; }
+  .modal { width: 520px; max-width: 100%; max-height: 90vh; background: var(--bg); border-radius: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); transform: translateY(16px) scale(0.98); transition: transform 0.24s cubic-bezier(.3,.7,.2,1); display: flex; flex-direction: column; overflow: hidden; }
+  .overlay.show .modal { transform: translateY(0) scale(1); }
+  .modal-head { background: var(--white); padding: 20px 24px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+  .modal-head h2 { font-size: 17px; font-weight: 900; display: flex; align-items: center; gap: 10px; }
+  .modal-head h2 .mi { width: 30px; height: 30px; border-radius: 8px; background: rgba(192,57,43,0.09); color: var(--pdf); display: grid; place-items: center; }
+  .modal-head .closeb { border: none; background: var(--field); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; color: var(--muted); display: grid; place-items: center; transition: all 0.15s; }
+  .modal-head .closeb:hover { background: var(--line); color: var(--ink); }
+  .modal-body { padding: 22px 24px; overflow-y: auto; }
+  .modal-foot { background: var(--white); padding: 16px 24px; border-top: 1px solid var(--line); display: flex; gap: 12px; }
+
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; margin-bottom: 7px; }
+  .req { font-size: 10px; font-weight: 700; color: var(--danger); background: rgba(192,57,43,0.10); padding: 1px 6px; border-radius: 4px; }
+  .field input[type=text], .field input[type=url], .field textarea, .field select {
+    width: 100%; font-family: inherit; font-size: 13.5px; color: var(--ink); background: var(--white);
+    border: 1.5px solid var(--line); border-radius: 9px; padding: 11px 13px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field textarea { resize: vertical; min-height: 76px; line-height: 1.6; }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(248,212,35,0.22); }
+  .field input.invalid { border-color: var(--danger); background: #FDF3F2; }
+  .gdrive-hint { display: flex; gap: 9px; background: rgba(26,58,107,0.05); border: 1.5px solid rgba(26,58,107,0.15); border-radius: 9px; padding: 11px 13px; margin-top: 8px; font-size: 11.5px; color: #3a4a66; line-height: 1.55; }
+  .gdrive-hint .gh-ic { color: var(--navy); flex-shrink: 0; margin-top: 1px; }
+  .url-ok { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ok); font-weight: 700; margin-top: 7px; }
+  .err { font-size: 11.5px; color: var(--danger); margin-top: 6px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+
+  .btn-save { flex: 1; font-family: inherit; font-size: 14px; font-weight: 900; color: var(--ink); background: var(--accent); border: none; border-radius: 10px; padding: 13px; cursor: pointer; box-shadow: 0 3px 10px rgba(248,212,35,0.4); transition: all 0.15s; }
+  .btn-save:hover { background: var(--accent-press); }
+  .btn-cancel { font-family: inherit; font-size: 14px; font-weight: 700; color: var(--ink); background: var(--white); border: 1.5px solid var(--line); border-radius: 10px; padding: 13px 24px; cursor: pointer; transition: all 0.15s; }
+  .btn-cancel:hover { background: var(--field); border-color: var(--muted); }
+
+  /* toast */
+  .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px); background: var(--navy); color: var(--white); font-size: 13px; font-weight: 500; padding: 13px 22px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.22); opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s; z-index: 60; display: flex; align-items: center; gap: 9px; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast .tk { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+const { useState, useMemo } = React;
+
+function Icon({ children, size = 18 }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
+}
+const PdfGlyph = ({ size }) => <Icon size={size}><g><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></g></Icon>;
+
+const NAV = [
+  { key: "dash", label: "ダッシュボード", icon: <path d="M3 13h8V3H3zM13 21h8V11h-8zM13 3v6h8V3zM3 21h8v-6H3z"/> },
+  { key: "users", label: "ユーザー管理", icon: <g><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></g>, badge: 3 },
+  { key: "articles", label: "記事管理", icon: <g><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></g> },
+  { key: "pdf", label: "PDF管理", icon: <g><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></g> },
+  { key: "cat", label: "カテゴリ管理", icon: <g><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></g> },
+  { key: "stats", label: "統計", icon: <g><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></g> },
+];
+
+const ARTICLES = [
+  "「やりたいこと」が見つからない人のための自己分析フレーム",
+  "強みは「経験」ではなく「再現性」で語る｜自己PRの設計図",
+  "通過するガクチカの作り方｜結論ファーストの型",
+  "逆質問で差をつける｜面接官が評価する5つの質問",
+  "20代でやっておくべきキャリアの棚卸し",
+  "比べない技術｜SNS時代の就活メンタル管理",
+  "価値観カードで見つける、譲れない3つの軸",
+  "大企業 vs ベンチャー、判断軸を10分で整理する",
+];
+
+function mk(id, name, linked, desc, slug, date) {
+  return { id, name, linked, desc, url: "drive.google.com/file/d/" + slug, date };
+}
+const INITIAL = [
+  mk(1, "心が動いた瞬間ワークシート", 0, "過去の経験から心が動いた瞬間を抽出し、3つの価値観の軸に整理するワーク。", "1aZ9bX", "6/5"),
+  mk(2, "自己PR設計シート（再現性ver.）", 1, "強みを再現性のあるエピソードとして言語化するテンプレート。", "2bY8cW", "6/4"),
+  mk(3, "ガクチカ構成フレーム", 2, "結論ファーストで伝わるガクチカを穴埋め形式で組み立てられる。", "3cX7dV", "6/3"),
+  mk(4, "逆質問リスト30選", 3, "面接官の印象に残る逆質問を場面別に30個まとめた早見表。", "4dW6eU", "6/1"),
+  mk(5, "キャリアの棚卸しテンプレート", 4, "経験・スキル・価値観を一枚で棚卸しできるシート。", "5eV5fT", "5/30"),
+  mk(6, "就活メンタル セルフチェック表", -1, "今の心の状態を可視化し、無理しすぎていないか確認できる。", "6fU4gS", "5/28"),
+];
+
+function App() {
+  const [pdfs, setPdfs] = useState(INITIAL);
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState({ name: "", url: "", desc: "", linked: "" });
+  const [err, setErr] = useState({});
+  const [toast, setToast] = useState("");
+
+  function flash(msg) { setToast(msg); clearTimeout(window._t); window._t = setTimeout(() => setToast(""), 2200); }
+
+  const filtered = useMemo(() =>
+    pdfs.filter(p => q.trim() === "" || p.name.includes(q.trim()) || (p.linked >= 0 && ARTICLES[p.linked].includes(q.trim()))),
+    [pdfs, q]);
+
+  function openNew() { setEditId(null); setForm({ name: "", url: "", desc: "", linked: "" }); setErr({}); setOpen(true); }
+  function openEdit(p) { setEditId(p.id); setForm({ name: p.name, url: "https://" + p.url, desc: p.desc, linked: p.linked >= 0 ? String(p.linked) : "" }); setErr({}); setOpen(true); }
+  function close() { setOpen(false); }
+
+  const urlValid = /drive\.google\.com/.test(form.url) && form.url.length > 22;
+
+  function save() {
+    const e = {};
+    if (!form.name.trim()) e.name = "PDF名を入力してください";
+    if (!form.url.trim()) e.url = "GoogleドライブURLを入力してください";
+    else if (!/drive\.google\.com/.test(form.url)) e.url = "Googleドライブの共有URLを入力してください";
+    setErr(e);
+    if (Object.keys(e).length > 0) return;
+    const linked = form.linked === "" ? -1 : parseInt(form.linked, 10);
+    if (editId) {
+      setPdfs(ps => ps.map(p => p.id === editId ? { ...p, name: form.name, desc: form.desc, linked, url: form.url.replace(/^https?:\/\//, "") } : p));
+      flash("PDFを更新しました");
+    } else {
+      const id = Math.max(0, ...pdfs.map(p => p.id)) + 1;
+      setPdfs(ps => [{ id, name: form.name, desc: form.desc, linked, url: form.url.replace(/^https?:\/\//, ""), date: "今日" }, ...ps]);
+      flash("PDFを追加しました");
+    }
+    setOpen(false);
+  }
+  function del(p) { setPdfs(ps => ps.filter(x => x.id !== p.id)); flash("「" + (p.name.length > 12 ? p.name.slice(0,12)+"…" : p.name) + "」を削除しました"); }
+
+  return (
+    <div className="shell">
+      <aside className="sidebar">
+        <div className="sb-brand">
+          <div className="mark"><span>ジ</span></div>
+          <div className="t"><div className="n">ジブンゼミ</div><div className="s">ADMIN</div></div>
+        </div>
+        <nav className="sb-nav">
+          <div className="sb-label">メニュー</div>
+          {NAV.map(n => (
+            <button key={n.key} className={"sb-item" + (n.key === "pdf" ? " active" : "")} onClick={()=>{}}>
+              <Icon>{n.icon}</Icon>{n.label}
+              {n.badge && <span className="badge">{n.badge}</span>}
+            </button>
+          ))}
+        </nav>
+        <div className="sb-foot">
+          <div className="sb-user"><div className="av">ご</div><div className="u"><div className="un">ごっちん</div><div className="ur">管理者</div></div></div>
+        </div>
+      </aside>
+
+      <main className="main">
+        <div className="topbar">
+          <div><h1>PDF管理</h1><div className="sub">Googleドライブの共有URLを登録して、ワークシートを管理します</div></div>
+          <button className="btn-add" onClick={openNew}>
+            <Icon size={16}><g><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></g></Icon>
+            PDFを追加
+          </button>
+        </div>
+
+        <div className="toolbar">
+          <div className="stat-line">全 <b>{pdfs.length}</b> 件のワークシート</div>
+          <div className="search-wrap">
+            <span className="s-icon"><Icon size={17}><g><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></g></Icon></span>
+            <input className="search-input" type="text" placeholder="PDF名・記事名で検索" value={q} onChange={e => setQ(e.target.value)} />
+          </div>
+        </div>
+
+        <div className="panel">
+          <table>
+            <thead>
+              <tr>
+                <th>PDF名</th><th>紐づき記事</th><th>説明文</th><th>GoogleドライブURL</th><th>追加日</th><th style={{textAlign:"right"}}>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr className="empty-row"><td colSpan="6">該当するPDFがありません</td></tr>
+              ) : filtered.map(p => (
+                <tr key={p.id}>
+                  <td>
+                    <div className="pdf-name-cell">
+                      <div className="pdf-ic"><PdfGlyph size={16} /><span className="ext">PDF</span></div>
+                      <span className="pdf-name">{p.name}</span>
+                    </div>
+                  </td>
+                  <td>
+                    {p.linked >= 0 ? (
+                      <div className="linked-cell">
+                        <div className="lc-in">
+                          <span className="li"><Icon size={13}><g><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></g></Icon></span>
+                          <span className="lt">{ARTICLES[p.linked]}</span>
+                        </div>
+                      </div>
+                    ) : <span className="linked-cell none">未紐づけ</span>}
+                  </td>
+                  <td><div className="desc-cell">{p.desc}</div></td>
+                  <td>
+                    <a className="gdrive-url" href="#" onClick={e=>e.preventDefault()}>
+                      <Icon size={13}><g><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></g></Icon>
+                      <span className="gt">{p.url}</span>
+                    </a>
+                  </td>
+                  <td><span className="date-c">{p.date}</span></td>
+                  <td>
+                    <div className="row-actions">
+                      <button className="ab edit" onClick={() => openEdit(p)}>
+                        <Icon size={12}><g><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></g></Icon>編集
+                      </button>
+                      <button className="ab del" onClick={() => del(p)}>
+                        <Icon size={12}><g><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></g></Icon>削除
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
+
+      {/* Modal */}
+      <div className={"overlay" + (open ? " show" : "")} onClick={close}>
+        <div className="modal" onClick={e => e.stopPropagation()}>
+          <div className="modal-head">
+            <h2><span className="mi"><PdfGlyph size={16} /></span>{editId ? "PDFを編集" : "PDFを追加"}</h2>
+            <button className="closeb" onClick={close}><Icon size={17}><g><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></g></Icon></button>
+          </div>
+          <div className="modal-body">
+            <div className="field">
+              <label>PDF名 <span className="req">必須</span></label>
+              <input type="text" placeholder="例：心が動いた瞬間ワークシート" value={form.name}
+                onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={err.name ? "invalid" : ""} />
+              {err.name && <div className="err"><Icon size={13}><g><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></g></Icon>{err.name}</div>}
+            </div>
+
+            <div className="field">
+              <label>GoogleドライブURL（共有URL） <span className="req">必須</span></label>
+              <input type="url" placeholder="https://drive.google.com/file/d/xxxxxx/view" value={form.url}
+                onChange={e => setForm(f => ({ ...f, url: e.target.value }))} className={err.url ? "invalid" : ""} />
+              {err.url && <div className="err"><Icon size={13}><g><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></g></Icon>{err.url}</div>}
+              {!err.url && urlValid && <span className="url-ok"><Icon size={13}><polyline points="20 6 9 17 4 12"/></Icon>有効な共有URLです</span>}
+              <div className="gdrive-hint">
+                <span className="gh-ic"><Icon size={15}><g><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></g></Icon></span>
+                <span>GoogleドライブでPDFを「リンクを知っている全員が閲覧可」の共有設定にしてからURLを貼り付けてください。</span>
+              </div>
+            </div>
+
+            <div className="field">
+              <label>説明文</label>
+              <textarea placeholder="このワークシートの内容を1〜2行で説明します" value={form.desc}
+                onChange={e => setForm(f => ({ ...f, desc: e.target.value }))}></textarea>
+            </div>
+
+            <div className="field">
+              <label>紐づける記事</label>
+              <select value={form.linked} onChange={e => setForm(f => ({ ...f, linked: e.target.value }))}>
+                <option value="">紐づけなし</option>
+                {ARTICLES.map((a, i) => <option key={i} value={i}>{a}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="modal-foot">
+            <button className="btn-cancel" onClick={close}>キャンセル</button>
+            <button className="btn-save" onClick={save}>{editId ? "更新する" : "PDFを追加"}</button>
+          </div>
+        </div>
+      </div>
+
+      <div className={"toast" + (toast ? " show" : "")}>
+        <span className="tk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1A3A6B" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        {toast}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

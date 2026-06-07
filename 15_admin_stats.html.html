@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ジブンゼミ｜統計・分析</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F4F4F5;
+    --accent: #F8D423;
+    --accent-press: #E8C40F;
+    --navy: #1A3A6B;
+    --ink: #1F1F1F;
+    --white: #FFFFFF;
+    --muted: #6B6B70;
+    --line: #E4E4E7;
+    --field: #FAFAFA;
+    --radius: 12px;
+    --shadow: 0 4px 16px rgba(0,0,0,0.12);
+    --ok: #1F8A5B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: "Noto Sans JP", sans-serif; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  #root { min-height: 100%; }
+
+  .shell { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar { background: var(--navy); color: var(--white); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+  .sb-brand { display: flex; align-items: center; gap: 11px; padding: 20px 22px; border-bottom: 1px solid rgba(255,255,255,0.10); }
+  .sb-brand .mark { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+  .sb-brand .mark span { font-weight: 900; font-size: 17px; color: var(--navy); }
+  .sb-brand .t { line-height: 1.2; }
+  .sb-brand .t .n { font-weight: 700; font-size: 15px; letter-spacing: 0.03em; }
+  .sb-brand .t .s { font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 700; letter-spacing: 0.08em; }
+  .sb-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 3px; }
+  .sb-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4); letter-spacing: 0.1em; padding: 10px 12px 6px; }
+  .sb-item { display: flex; align-items: center; gap: 12px; padding: 11px 13px; border-radius: 9px; color: rgba(255,255,255,0.78); font-size: 13.5px; font-weight: 700; cursor: pointer; border: none; background: none; font-family: inherit; text-align: left; width: 100%; transition: background 0.15s, color 0.15s; }
+  .sb-item:hover { background: rgba(255,255,255,0.08); color: var(--white); }
+  .sb-item.active { background: var(--accent); color: var(--ink); }
+  .sb-item .badge { margin-left: auto; font-size: 10.5px; font-weight: 900; background: var(--accent); color: var(--ink); min-width: 19px; height: 19px; padding: 0 5px; border-radius: 99px; display: grid; place-items: center; }
+  .sb-foot { padding: 14px; border-top: 1px solid rgba(255,255,255,0.10); }
+  .sb-user { display: flex; align-items: center; gap: 11px; padding: 8px 6px; }
+  .sb-user .av { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: var(--navy); display: grid; place-items: center; font-weight: 900; font-size: 14px; }
+  .sb-user .u { line-height: 1.3; }
+  .sb-user .u .un { font-size: 13px; font-weight: 700; }
+  .sb-user .u .ur { font-size: 10.5px; color: rgba(255,255,255,0.55); }
+
+  /* ── Main ── */
+  .main { padding: 26px 32px 48px; max-width: 1180px; }
+  .topbar { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 22px; gap: 16px; }
+  .topbar h1 { font-size: 23px; font-weight: 900; }
+  .topbar .sub { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .period { display: flex; gap: 4px; background: var(--white); border: 1.5px solid var(--line); border-radius: 10px; padding: 4px; }
+  .period button { font-family: inherit; font-size: 12.5px; font-weight: 700; color: var(--muted); background: none; border: none; padding: 8px 15px; border-radius: 7px; cursor: pointer; transition: all 0.15s; }
+  .period button:hover { color: var(--ink); }
+  .period button.active { background: var(--accent); color: var(--ink); }
+
+  /* KPI */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 26px; }
+  .kpi { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 22px; }
+  .kpi .k-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .kpi .k-ic { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; }
+  .kpi .k-ic.c1 { background: rgba(26,58,107,0.10); color: var(--navy); }
+  .kpi .k-ic.c2 { background: var(--accent); color: var(--ink); }
+  .kpi .k-ic.c3 { background: rgba(192,57,43,0.10); color: #C0392B; }
+  .kpi .k-ic.c4 { background: rgba(31,138,91,0.12); color: var(--ok); }
+  .kpi .k-trend { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 99px; display: flex; align-items: center; gap: 3px; background: rgba(31,138,91,0.10); color: var(--ok); }
+  .kpi .k-val { font-size: 30px; font-weight: 900; line-height: 1; display: flex; align-items: baseline; gap: 4px; }
+  .kpi .k-val .unit { font-size: 14px; font-weight: 700; color: var(--muted); }
+  .kpi .k-label { font-size: 12.5px; color: var(--muted); font-weight: 700; margin-top: 9px; }
+
+  /* ── Panels ── */
+  .panel { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 24px; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--line); }
+  .panel-head h2 { font-size: 15px; font-weight: 900; display: flex; align-items: center; gap: 9px; }
+  .panel-head h2 .tick { width: 5px; height: 16px; background: var(--accent); border-radius: 2px; }
+  .panel-head .ph-note { font-size: 11.5px; color: var(--muted); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th { font-size: 11px; font-weight: 700; color: var(--muted); text-align: left; padding: 12px 22px; background: var(--field); letter-spacing: 0.02em; white-space: nowrap; }
+  thead th.sortable { cursor: pointer; user-select: none; transition: color 0.15s; }
+  thead th.sortable:hover { color: var(--ink); }
+  thead th .th-in { display: inline-flex; align-items: center; gap: 5px; }
+  thead th.num { text-align: right; }
+  thead th .sort-ar { opacity: 0.35; transition: opacity 0.15s; }
+  thead th.active-sort .sort-ar { opacity: 1; color: var(--navy); }
+  thead th.active-sort { color: var(--ink); }
+  tbody td { padding: 13px 22px; font-size: 13px; border-top: 1px solid var(--line); vertical-align: middle; }
+  tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody tr:hover { background: var(--field); }
+  .rank { width: 24px; height: 24px; border-radius: 6px; background: var(--field); border: 1px solid var(--line); color: var(--muted); font-size: 11px; font-weight: 900; display: inline-grid; place-items: center; margin-right: 10px; }
+  .rank.top { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+  .a-title { font-weight: 700; max-width: 300px; line-height: 1.4; display: flex; align-items: center; }
+  .a-title .at { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cat-tag { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 6px; white-space: nowrap; }
+  .cat-self { background: rgba(248,212,35,0.22); color: #8a7000; }
+  .cat-shukatsu { background: rgba(26,58,107,0.10); color: var(--navy); }
+  .cat-career { background: rgba(107,70,193,0.12); color: #5a37b0; }
+  .cat-mind { background: rgba(31,138,91,0.12); color: var(--ok); }
+  .rate-cell { display: inline-flex; align-items: center; gap: 9px; justify-content: flex-end; width: 100%; }
+  .rate-bar { width: 54px; height: 6px; background: var(--field); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; }
+  .rate-bar > div { height: 100%; background: var(--accent); border-radius: 99px; }
+  .rate-val { font-weight: 900; min-width: 38px; text-align: right; }
+
+  /* Two col */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+
+  /* PDF ranking bars */
+  .rank-list { padding: 18px 22px; display: flex; flex-direction: column; gap: 16px; }
+  .rank-item .ri-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .ri-name { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; min-width: 0; }
+  .ri-name .rn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ri-val { font-size: 13px; font-weight: 900; color: var(--navy); white-space: nowrap; margin-left: 12px; }
+  .ri-val .u { font-size: 11px; color: var(--muted); font-weight: 700; }
+  .ri-track { height: 12px; background: var(--field); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; }
+  .ri-fill { height: 100%; border-radius: 99px; background: var(--accent); width: 0; transition: width 1s cubic-bezier(.2,.7,.2,1); }
+  .ri-fill.alt { background: var(--navy); }
+
+  /* User progress */
+  .u-cell { display: flex; align-items: center; gap: 11px; }
+  .u-cell .av { width: 32px; height: 32px; border-radius: 50%; background: rgba(26,58,107,0.10); color: var(--navy); display: grid; place-items: center; font-weight: 900; font-size: 12px; flex-shrink: 0; }
+  .u-cell .un { font-weight: 700; }
+  .uprog { display: inline-flex; align-items: center; gap: 9px; justify-content: flex-end; width: 100%; }
+  .uprog-bar { width: 60px; height: 6px; background: var(--field); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; }
+  .uprog-bar > div { height: 100%; background: var(--ok); border-radius: 99px; }
+  .uprog-val { font-weight: 900; min-width: 38px; text-align: right; }
+  .last-access { color: var(--muted); white-space: nowrap; }
+
+  @media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+const { useState, useMemo, useEffect } = React;
+
+function Icon({ children, size = 18 }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
+}
+
+const NAV = [
+  { key: "dash", label: "ダッシュボード", icon: <path d="M3 13h8V3H3zM13 21h8V11h-8zM13 3v6h8V3zM3 21h8v-6H3z"/> },
+  { key: "users", label: "ユーザー管理", icon: <g><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></g>, badge: 3 },
+  { key: "articles", label: "記事管理", icon: <g><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></g> },
+  { key: "pdf", label: "PDF管理", icon: <g><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></g> },
+  { key: "cat", label: "カテゴリ管理", icon: <g><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></g> },
+  { key: "stats", label: "統計", icon: <g><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></g> },
+];
+
+const CATMAP = { self: { label: "自己分析", cls: "cat-self" }, shukatsu: { label: "就活対策", cls: "cat-shukatsu" }, career: { label: "キャリア設計", cls: "cat-career" }, mind: { label: "マインドセット", cls: "cat-mind" } };
+
+const ARTICLES = [
+  { title: "「やりたいこと」が見つからない自己分析フレーム", cat: "self", views: 412, reads: 288, pdf: 142 },
+  { title: "通過するガクチカの作り方｜結論ファーストの型", cat: "shukatsu", views: 388, reads: 301, pdf: 98 },
+  { title: "強みは「再現性」で語る｜自己PRの設計図", cat: "self", views: 356, reads: 224, pdf: 110 },
+  { title: "20代でやっておくべきキャリアの棚卸し", cat: "career", views: 301, reads: 188, pdf: 76 },
+  { title: "逆質問で差をつける｜面接官が評価する質問", cat: "shukatsu", views: 287, reads: 173, pdf: 64 },
+  { title: "比べない技術｜SNS時代の就活メンタル管理", cat: "mind", views: 244, reads: 132, pdf: 41 },
+  { title: "価値観カードで見つける、譲れない3つの軸", cat: "self", views: 219, reads: 156, pdf: 88 },
+  { title: "大企業 vs ベンチャー、判断軸を10分で整理", cat: "career", views: 198, reads: 101, pdf: 52 },
+  { title: "ES添削で必ず指摘される「主語のズレ」とは", cat: "shukatsu", views: 176, reads: 119, pdf: 33 },
+  { title: "「内定が出ない」時期の過ごし方と立て直し方", cat: "mind", views: 154, reads: 97, pdf: 28 },
+];
+
+const PDF_RANK = [
+  { name: "心が動いた瞬間ワークシート", dl: 142 },
+  { name: "自己PR設計シート（再現性ver.）", dl: 110 },
+  { name: "ガクチカ構成フレーム", dl: 98 },
+  { name: "価値観カード（印刷用）", dl: 88 },
+  { name: "キャリアの棚卸しテンプレート", dl: 76 },
+];
+
+const USERS = [
+  { name: "後藤 美咲", initial: "後", reads: 38, pct: 38, last: "6/7 09:24" },
+  { name: "山本 さくら", initial: "山", reads: 31, pct: 31, last: "6/7 08:10" },
+  { name: "加藤 直樹", initial: "加", reads: 27, pct: 27, last: "6/6 22:40" },
+  { name: "渡辺 真衣", initial: "渡", reads: 22, pct: 22, last: "6/6 19:05" },
+  { name: "伊藤 拓海", initial: "伊", reads: 18, pct: 18, last: "6/5 13:20" },
+  { name: "小林 あゆみ", initial: "小", reads: 14, pct: 14, last: "6/4 21:33" },
+];
+
+function App() {
+  const [period, setPeriod] = useState("30");
+  const [sort, setSort] = useState({ key: "views", dir: "desc" });
+  const [anim, setAnim] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setAnim(true), 250); return () => clearTimeout(t); }, []);
+
+  const rows = useMemo(() => {
+    const withRate = ARTICLES.map(a => ({ ...a, rate: Math.round(a.reads / a.views * 100) }));
+    const sorted = [...withRate].sort((x, y) => {
+      const d = sort.dir === "desc" ? -1 : 1;
+      if (sort.key === "title") return x.title.localeCompare(y.title) * d;
+      return (x[sort.key] - y[sort.key]) * d;
+    });
+    return sorted.slice(0, 10);
+  }, [sort]);
+
+  function toggleSort(key) {
+    setSort(s => s.key === key ? { key, dir: s.dir === "desc" ? "asc" : "desc" } : { key, dir: "desc" });
+  }
+  function SortHead({ k, label, num }) {
+    const active = sort.key === k;
+    return (
+      <th className={"sortable" + (num ? " num" : "") + (active ? " active-sort" : "")} onClick={() => toggleSort(k)}>
+        <span className="th-in">{label}<span className="sort-ar">{active && sort.dir === "asc"
+          ? <Icon size={12}><polyline points="18 15 12 9 6 15"/></Icon>
+          : <Icon size={12}><polyline points="6 9 12 15 18 9"/></Icon>}</span></span>
+      </th>
+    );
+  }
+
+  const maxDl = Math.max(...PDF_RANK.map(p => p.dl));
+
+  return (
+    <div className="shell">
+      <aside className="sidebar">
+        <div className="sb-brand">
+          <div className="mark"><span>ジ</span></div>
+          <div className="t"><div className="n">ジブンゼミ</div><div className="s">ADMIN</div></div>
+        </div>
+        <nav className="sb-nav">
+          <div className="sb-label">メニュー</div>
+          {NAV.map(n => (
+            <button key={n.key} className={"sb-item" + (n.key === "stats" ? " active" : "")} onClick={()=>{}}>
+              <Icon>{n.icon}</Icon>{n.label}
+              {n.badge && <span className="badge">{n.badge}</span>}
+            </button>
+          ))}
+        </nav>
+        <div className="sb-foot">
+          <div className="sb-user"><div className="av">ご</div><div className="u"><div className="un">ごっちん</div><div className="ur">管理者</div></div></div>
+        </div>
+      </aside>
+
+      <main className="main">
+        <div className="topbar">
+          <div><h1>統計・分析</h1><div className="sub">コンテンツの人気度とユーザーの学習状況を把握できます</div></div>
+          <div className="period">
+            {[["7","直近7日"],["30","直近30日"],["all","全期間"]].map(([k, l]) => (
+              <button key={k} className={period === k ? "active" : ""} onClick={() => setPeriod(k)}>{l}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* KPI */}
+        <div className="kpi-grid">
+          <div className="kpi">
+            <div className="k-top"><div className="k-ic c1"><Icon><g><path d="M2 12s3-8 10-8 10 8 10 8-3 8-10 8-10-8-10-8z"/><circle cx="12" cy="12" r="3"/></g></Icon></div><span className="k-trend">＋12%</span></div>
+            <div className="k-val">2,935<span className="unit">回</span></div>
+            <div className="k-label">総閲覧数</div>
+          </div>
+          <div className="kpi">
+            <div className="k-top"><div className="k-ic c2"><Icon><g><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></g></Icon></div><span className="k-trend">＋9%</span></div>
+            <div className="k-val">1,879<span className="unit">回</span></div>
+            <div className="k-label">総読了数</div>
+          </div>
+          <div className="kpi">
+            <div className="k-top"><div className="k-ic c3"><Icon><g><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></g></Icon></div><span className="k-trend">＋18%</span></div>
+            <div className="k-val">732<span className="unit">件</span></div>
+            <div className="k-label">PDF総ダウンロード数</div>
+          </div>
+          <div className="kpi">
+            <div className="k-top"><div className="k-ic c4"><Icon><g><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></g></Icon></div><span className="k-trend">＋4</span></div>
+            <div className="k-val">41<span className="unit">人</span></div>
+            <div className="k-label">アクティブユーザー数</div>
+          </div>
+        </div>
+
+        {/* Article performance */}
+        <div className="panel">
+          <div className="panel-head">
+            <h2><span className="tick"></span>記事別パフォーマンス</h2>
+            <span className="ph-note">上位10件・列見出しクリックで並び替え</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <SortHead k="title" label="記事タイトル" />
+                <th>カテゴリ</th>
+                <SortHead k="views" label="閲覧数" num />
+                <SortHead k="reads" label="読了数" num />
+                <SortHead k="rate" label="読了率" num />
+                <SortHead k="pdf" label="PDF DL数" num />
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((a, i) => (
+                <tr key={a.title}>
+                  <td>
+                    <div className="a-title">
+                      <span className={"rank" + (i < 3 ? " top" : "")}>{i + 1}</span>
+                      <span className="at">{a.title}</span>
+                    </div>
+                  </td>
+                  <td><span className={"cat-tag " + CATMAP[a.cat].cls}>{CATMAP[a.cat].label}</span></td>
+                  <td className="num">{a.views.toLocaleString()}</td>
+                  <td className="num">{a.reads.toLocaleString()}</td>
+                  <td className="num">
+                    <span className="rate-cell">
+                      <span className="rate-bar"><div style={{ width: a.rate + "%" }}></div></span>
+                      <span className="rate-val">{a.rate}%</span>
+                    </span>
+                  </td>
+                  <td className="num">{a.pdf}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="two-col">
+          {/* PDF ranking */}
+          <div className="panel" style={{marginBottom:0}}>
+            <div className="panel-head"><h2><span className="tick"></span>PDFダウンロード数 ランキング</h2><span className="ph-note">上位5件</span></div>
+            <div className="rank-list">
+              {PDF_RANK.map((p, i) => (
+                <div className="rank-item" key={i}>
+                  <div className="ri-top">
+                    <div className="ri-name"><span className={"rank" + (i < 3 ? " top" : "")}>{i + 1}</span><span className="rn">{p.name}</span></div>
+                    <div className="ri-val">{p.dl}<span className="u"> 件</span></div>
+                  </div>
+                  <div className="ri-track"><div className={"ri-fill" + (i % 2 ? " alt" : "")} style={{ width: (anim ? (p.dl / maxDl * 100) : 0) + "%" }}></div></div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* User progress */}
+          <div className="panel" style={{marginBottom:0}}>
+            <div className="panel-head"><h2><span className="tick"></span>ユーザー別進捗</h2><span className="ph-note">上位6名</span></div>
+            <table>
+              <thead>
+                <tr><th>氏名</th><th className="num">読了数</th><th className="num">進捗率</th><th>最終アクセス</th></tr>
+              </thead>
+              <tbody>
+                {USERS.map((u, i) => (
+                  <tr key={i}>
+                    <td><div className="u-cell"><div className="av">{u.initial}</div><span className="un">{u.name}</span></div></td>
+                    <td className="num">{u.reads}<span style={{color:"var(--muted)",fontSize:"11px"}}> /100</span></td>
+                    <td className="num">
+                      <span className="uprog"><span className="uprog-bar"><div style={{ width: u.pct + "%" }}></div></span><span className="uprog-val">{u.pct}%</span></span>
+                    </td>
+                    <td><span className="last-access">{u.last}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

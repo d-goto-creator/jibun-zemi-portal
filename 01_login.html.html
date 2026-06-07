@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ジブンゼミ｜ログイン</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F4F4F5;
+    --accent: #F8D423;
+    --accent-press: #E8C40F;
+    --navy: #1A3A6B;
+    --ink: #1F1F1F;
+    --white: #FFFFFF;
+    --muted: #6B6B70;
+    --line: #E4E4E7;
+    --field: #FAFAFA;
+    --radius: 12px;
+    --shadow: 0 4px 16px rgba(0,0,0,0.12);
+    --danger: #C0392B;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+  }
+
+  body {
+    font-family: "Noto Sans JP", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  #root {
+    min-height: 100%;
+  }
+
+  /* ── Top brand bar ── */
+  .topbar {
+    height: 56px;
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .topbar .brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .brand-mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: var(--accent);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .brand-mark span {
+    font-weight: 900;
+    font-size: 15px;
+    color: var(--navy);
+    line-height: 1;
+  }
+  .topbar .brand-name {
+    color: var(--white);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Layout ── */
+  .page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 20px 64px;
+  }
+
+  .lockup {
+    text-align: center;
+    margin-bottom: 26px;
+  }
+  .lockup .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .lockup .logo .big-mark {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--accent);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 3px 10px rgba(248,212,35,0.4);
+  }
+  .lockup .logo .big-mark span {
+    font-weight: 900;
+    font-size: 24px;
+    color: var(--navy);
+    line-height: 1;
+  }
+  .lockup .logo h1 {
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+  }
+  .lockup p {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Card ── */
+  .card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 28px 30px;
+  }
+
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .card-sub {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 22px;
+    position: relative;
+  }
+  .tab {
+    appearance: none;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--muted);
+    padding: 11px 8px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    line-height: 1;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active {
+    background: var(--white);
+    color: var(--ink);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.10);
+  }
+  .tab .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--line);
+    transition: background 0.2s;
+  }
+  .tab.active .dot { background: var(--accent); }
+
+  /* ── Fields ── */
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    margin-bottom: 7px;
+    color: var(--ink);
+  }
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-wrap.with-prefix .prefix {
+    position: absolute;
+    left: 13px;
+    font-size: 14px;
+    color: var(--muted);
+    pointer-events: none;
+    font-weight: 500;
+  }
+  input[type="text"],
+  input[type="tel"],
+  input[type="password"] {
+    width: 100%;
+    font-family: inherit;
+    font-size: 14.5px;
+    color: var(--ink);
+    background: var(--field);
+    border: 1.5px solid var(--line);
+    border-radius: 9px;
+    padding: 12px 14px;
+    transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+  }
+  .input-wrap.with-prefix input { padding-left: 40px; }
+  .input-wrap.with-toggle input { padding-right: 46px; }
+  input::placeholder { color: #B6B6BC; }
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(248,212,35,0.22);
+  }
+  input.invalid {
+    border-color: var(--danger);
+    background: #FDF3F2;
+  }
+  input.invalid:focus {
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.16);
+  }
+
+  .toggle-pw {
+    position: absolute;
+    right: 6px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 7px;
+    color: var(--muted);
+    display: grid;
+    place-items: center;
+    transition: color 0.15s, background 0.15s;
+  }
+  .toggle-pw:hover { color: var(--ink); background: var(--bg); }
+
+  .error-msg {
+    font-size: 11.5px;
+    color: var(--danger);
+    margin-top: 6px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .row-between {
+    display: flex;
+    justify-content: flex-end;
+    margin: -2px 0 20px;
+  }
+
+  /* ── Links ── */
+  .link {
+    font-size: 12.5px;
+    color: var(--navy);
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .link:hover { opacity: 0.65; text-decoration: underline; }
+
+  /* ── Submit ── */
+  .btn-login {
+    width: 100%;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--ink);
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.16s, transform 0.08s, box-shadow 0.16s;
+    box-shadow: 0 3px 10px rgba(248,212,35,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-login:hover { background: var(--accent-press); box-shadow: 0 5px 14px rgba(248,212,35,0.45); }
+  .btn-login:active { transform: translateY(1px); box-shadow: 0 2px 6px rgba(248,212,35,0.35); }
+  .btn-login:disabled {
+    background: #ECECEE;
+    color: #B6B6BC;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2.5px solid rgba(31,31,31,0.25);
+    border-top-color: var(--ink);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* ── Divider + signup ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 22px 0 18px;
+    color: var(--muted);
+    font-size: 11.5px;
+  }
+  .divider::before, .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  .signup {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .signup a {
+    color: var(--navy);
+    font-weight: 700;
+    text-decoration: none;
+    margin-left: 4px;
+  }
+  .signup a:hover { text-decoration: underline; }
+
+  .foot {
+    margin-top: 30px;
+    font-size: 11px;
+    color: #A0A0A6;
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--navy);
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 13px 22px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast .check {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .lockup { animation: rise 0.5s cubic-bezier(.2,.7,.2,1) both; }
+    .card { animation: rise 0.55s cubic-bezier(.2,.7,.2,1) 0.06s both; }
+  }
+
+  @media (max-width: 480px) {
+    .page { padding: 36px 16px 52px; }
+    .card { padding: 24px 20px 26px; }
+    .lockup .logo h1 { font-size: 26px; }
+    .lockup .logo .big-mark { width: 40px; height: 40px; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+const { useState, useRef } = React;
+
+function EyeIcon({ off }) {
+  return off ? (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+      <path d="M1 1l22 22"/>
+      <path d="M6.61 6.61A13.5 13.5 0 0 0 2 12s3 8 10 8a9.7 9.7 0 0 0 5.39-1.61"/>
+    </svg>
+  ) : (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 12s3-8 10-8 10 8 10 8-3 8-10 8-10-8-10-8z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  );
+}
+
+function WarnIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+  );
+}
+
+const TABS = [
+  { id: "phone", label: "電話番号" },
+  { id: "note", label: "noteアカウント" },
+];
+
+function App() {
+  const [tab, setTab] = useState("phone");
+  const [showPw, setShowPw] = useState(false);
+  const [vals, setVals] = useState({ phone: "", note: "", pw: "" });
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(false);
+  const toastTimer = useRef(null);
+
+  const idLabel = tab === "phone" ? "電話番号" : "note ユーザーID";
+  const idKey = tab === "phone" ? "phone" : "note";
+  const idPlaceholder = tab === "phone" ? "09012345678" : "jibun_taro";
+
+  function update(key, v) {
+    setVals(s => ({ ...s, [key]: v }));
+    if (touched) setErrors(validate({ ...vals, [key]: v }));
+  }
+
+  function validate(v) {
+    const e = {};
+    if (tab === "phone") {
+      const digits = v.phone.replace(/[-\s]/g, "");
+      if (!digits) e.phone = "電話番号を入力してください";
+      else if (!/^0\d{9,10}$/.test(digits)) e.phone = "正しい電話番号を入力してください";
+    } else {
+      if (!v.note) e.note = "noteユーザーIDを入力してください";
+    }
+    if (!v.pw) e.pw = "パスワードを入力してください";
+    else if (v.pw.length < 6) e.pw = "パスワードは6文字以上です";
+    return e;
+  }
+
+  function switchTab(id) {
+    if (id === tab) return;
+    setTab(id);
+    setErrors({});
+    setTouched(false);
+  }
+
+  function submit(ev) {
+    ev.preventDefault();
+    setTouched(true);
+    const e = validate(vals);
+    setErrors(e);
+    if (Object.keys(e).length > 0) return;
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setToast(true);
+      clearTimeout(toastTimer.current);
+      toastTimer.current = setTimeout(() => setToast(false), 2600);
+    }, 1100);
+  }
+
+  return (
+    <React.Fragment>
+      <header className="topbar">
+        <div className="brand">
+          <div className="brand-mark"><span>ジ</span></div>
+          <div className="brand-name">ジブンゼミ</div>
+        </div>
+      </header>
+
+      <main className="page">
+        <div className="lockup">
+          <div className="logo">
+            <div className="big-mark"><span>ジ</span></div>
+            <h1>ジブンゼミ</h1>
+          </div>
+          <p>キャリア・自己分析支援サブスクポータル</p>
+        </div>
+
+        <form className="card" onSubmit={submit} noValidate>
+          <div className="card-title">ログイン</div>
+          <div className="card-sub">会員ポータルにアクセスするにはログインしてください</div>
+
+          <div className="tabs" role="tablist">
+            {TABS.map(t => (
+              <button
+                type="button"
+                key={t.id}
+                role="tab"
+                aria-selected={tab === t.id}
+                className={"tab" + (tab === t.id ? " active" : "")}
+                onClick={() => switchTab(t.id)}
+              >
+                <span className="dot"></span>{t.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="field">
+            <label htmlFor="idfield">{idLabel}</label>
+            <div className={"input-wrap" + (tab === "note" ? " with-prefix" : "")}>
+              {tab === "note" && <span className="prefix">@</span>}
+              <input
+                id="idfield"
+                key={tab}
+                type={tab === "phone" ? "tel" : "text"}
+                inputMode={tab === "phone" ? "numeric" : "text"}
+                autoComplete={tab === "phone" ? "tel" : "username"}
+                placeholder={idPlaceholder}
+                value={vals[idKey]}
+                onChange={e => update(idKey, e.target.value)}
+                className={errors[idKey] ? "invalid" : ""}
+              />
+            </div>
+            {errors[idKey] && <div className="error-msg"><WarnIcon />{errors[idKey]}</div>}
+          </div>
+
+          <div className="field">
+            <label htmlFor="pwfield">パスワード</label>
+            <div className="input-wrap with-toggle">
+              <input
+                id="pwfield"
+                type={showPw ? "text" : "password"}
+                autoComplete="current-password"
+                placeholder="パスワードを入力"
+                value={vals.pw}
+                onChange={e => update("pw", e.target.value)}
+                className={errors.pw ? "invalid" : ""}
+              />
+              <button type="button" className="toggle-pw" aria-label="パスワードの表示切替" onClick={() => setShowPw(s => !s)}>
+                <EyeIcon off={showPw} />
+              </button>
+            </div>
+            {errors.pw && <div className="error-msg"><WarnIcon />{errors.pw}</div>}
+          </div>
+
+          <div className="row-between">
+            <a className="link" onClick={e => e.preventDefault()} href="#">パスワードをお忘れの方</a>
+          </div>
+
+          <button type="submit" className="btn-login" disabled={loading}>
+            {loading ? <React.Fragment><span className="spinner"></span>ログイン中…</React.Fragment> : "ログイン"}
+          </button>
+
+          <div className="divider">アカウントをお持ちでない方</div>
+
+          <div className="signup">
+            はじめての方は<a href="#" onClick={e => e.preventDefault()}>新規登録はこちら →</a>
+          </div>
+        </form>
+
+        <div className="foot">© 2026 ジブンゼミ　月額500円のキャリア支援サブスク</div>
+      </main>
+
+      <div className={"toast" + (toast ? " show" : "")}>
+        <span className="check">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1A3A6B" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        ログインしました（デモ）
+      </div>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

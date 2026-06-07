@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ジブンゼミ｜記事管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F4F4F5;
+    --accent: #F8D423;
+    --accent-press: #E8C40F;
+    --navy: #1A3A6B;
+    --ink: #1F1F1F;
+    --white: #FFFFFF;
+    --muted: #6B6B70;
+    --line: #E4E4E7;
+    --field: #FAFAFA;
+    --radius: 12px;
+    --shadow: 0 4px 16px rgba(0,0,0,0.12);
+    --ok: #1F8A5B;
+    --danger: #C0392B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: "Noto Sans JP", sans-serif; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  #root { min-height: 100%; }
+
+  .shell { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar { background: var(--navy); color: var(--white); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+  .sb-brand { display: flex; align-items: center; gap: 11px; padding: 20px 22px; border-bottom: 1px solid rgba(255,255,255,0.10); }
+  .sb-brand .mark { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+  .sb-brand .mark span { font-weight: 900; font-size: 17px; color: var(--navy); }
+  .sb-brand .t { line-height: 1.2; }
+  .sb-brand .t .n { font-weight: 700; font-size: 15px; letter-spacing: 0.03em; }
+  .sb-brand .t .s { font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 700; letter-spacing: 0.08em; }
+  .sb-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 3px; }
+  .sb-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4); letter-spacing: 0.1em; padding: 10px 12px 6px; }
+  .sb-item { display: flex; align-items: center; gap: 12px; padding: 11px 13px; border-radius: 9px; color: rgba(255,255,255,0.78); font-size: 13.5px; font-weight: 700; cursor: pointer; border: none; background: none; font-family: inherit; text-align: left; width: 100%; transition: background 0.15s, color 0.15s; }
+  .sb-item:hover { background: rgba(255,255,255,0.08); color: var(--white); }
+  .sb-item.active { background: var(--accent); color: var(--ink); }
+  .sb-item .badge { margin-left: auto; font-size: 10.5px; font-weight: 900; background: var(--accent); color: var(--ink); min-width: 19px; height: 19px; padding: 0 5px; border-radius: 99px; display: grid; place-items: center; }
+  .sb-foot { padding: 14px; border-top: 1px solid rgba(255,255,255,0.10); }
+  .sb-user { display: flex; align-items: center; gap: 11px; padding: 8px 6px; }
+  .sb-user .av { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: var(--navy); display: grid; place-items: center; font-weight: 900; font-size: 14px; }
+  .sb-user .u { line-height: 1.3; }
+  .sb-user .u .un { font-size: 13px; font-weight: 700; }
+  .sb-user .u .ur { font-size: 10.5px; color: rgba(255,255,255,0.55); }
+
+  /* ── Main ── */
+  .main { padding: 26px 32px 48px; }
+  .topbar { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; gap: 16px; }
+  .topbar h1 { font-size: 23px; font-weight: 900; }
+  .topbar .sub { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .btn-add { font-family: inherit; font-size: 13.5px; font-weight: 900; color: var(--ink); background: var(--accent); border: none; border-radius: 10px; padding: 12px 18px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 3px 10px rgba(248,212,35,0.4); transition: all 0.15s; }
+  .btn-add:hover { background: var(--accent-press); box-shadow: 0 5px 14px rgba(248,212,35,0.5); }
+  .btn-add:active { transform: translateY(1px); }
+
+  .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+  .stat-line { font-size: 12.5px; color: var(--muted); }
+  .stat-line b { color: var(--ink); font-weight: 700; }
+  .search-wrap { position: relative; width: 280px; }
+  .search-wrap .s-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+  .search-input { width: 100%; font-family: inherit; font-size: 13.5px; color: var(--ink); background: var(--white); border: 1.5px solid var(--line); border-radius: 10px; padding: 11px 14px 11px 40px; transition: border-color 0.15s, box-shadow 0.15s; }
+  .search-input::placeholder { color: #B6B6BC; }
+  .search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(248,212,35,0.22); }
+
+  /* ── Table ── */
+  .panel { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { font-size: 11px; font-weight: 700; color: var(--muted); text-align: left; padding: 13px 18px; background: var(--field); letter-spacing: 0.03em; white-space: nowrap; border-bottom: 1px solid var(--line); }
+  tbody td { padding: 14px 18px; font-size: 13px; border-top: 1px solid var(--line); vertical-align: middle; }
+  tbody tr:hover { background: var(--field); }
+  .a-title { font-weight: 700; max-width: 280px; line-height: 1.45; }
+  .cat-tag { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 6px; white-space: nowrap; }
+  .cat-self { background: rgba(248,212,35,0.22); color: #8a7000; }
+  .cat-shukatsu { background: rgba(26,58,107,0.10); color: var(--navy); }
+  .cat-career { background: rgba(107,70,193,0.12); color: #5a37b0; }
+  .cat-mind { background: rgba(31,138,91,0.12); color: var(--ok); }
+  .tags { display: flex; gap: 5px; flex-wrap: wrap; max-width: 160px; }
+  .tag { font-size: 10.5px; color: var(--muted); background: var(--field); border: 1px solid var(--line); padding: 2px 7px; border-radius: 5px; white-space: nowrap; }
+  .note-url { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11.5px; color: var(--navy); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; max-width: 150px; }
+  .note-url:hover { text-decoration: underline; }
+  .note-url .nt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .date-c { color: var(--muted); white-space: nowrap; }
+
+  /* toggle */
+  .toggle { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; }
+  .switch { width: 40px; height: 23px; border-radius: 99px; background: var(--line); position: relative; transition: background 0.2s; flex-shrink: 0; }
+  .switch::after { content: ""; position: absolute; top: 2.5px; left: 2.5px; width: 18px; height: 18px; border-radius: 50%; background: var(--white); box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform 0.2s; }
+  .toggle.on .switch { background: var(--ok); }
+  .toggle.on .switch::after { transform: translateX(17px); }
+  .toggle .tl { font-size: 11.5px; font-weight: 700; }
+  .toggle.on .tl { color: var(--ok); }
+  .toggle:not(.on) .tl { color: var(--muted); }
+
+  .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+  .ab { font-family: inherit; font-size: 11.5px; font-weight: 700; border-radius: 7px; padding: 7px 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.15s; border: 1.5px solid var(--line); background: var(--white); white-space: nowrap; }
+  .ab.edit { color: var(--navy); }
+  .ab.edit:hover { border-color: var(--navy); background: var(--field); }
+  .ab.del { color: var(--danger); }
+  .ab.del:hover { border-color: var(--danger); background: #FDF3F2; }
+  .empty-row td { text-align: center; color: var(--muted); padding: 40px; font-size: 13px; }
+
+  /* ── Side panel ── */
+  .overlay { position: fixed; inset: 0; background: rgba(20,30,50,0.4); opacity: 0; pointer-events: none; transition: opacity 0.25s; z-index: 40; }
+  .overlay.show { opacity: 1; pointer-events: auto; }
+  .panel-side { position: fixed; top: 0; right: 0; height: 100vh; width: 480px; max-width: 92vw; background: var(--bg); box-shadow: -8px 0 30px rgba(0,0,0,0.18); transform: translateX(100%); transition: transform 0.28s cubic-bezier(.3,.7,.2,1); z-index: 41; display: flex; flex-direction: column; }
+  .panel-side.show { transform: translateX(0); }
+  .ps-head { background: var(--white); padding: 20px 24px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+  .ps-head h2 { font-size: 17px; font-weight: 900; }
+  .ps-head .closeb { border: none; background: var(--field); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; color: var(--muted); display: grid; place-items: center; transition: all 0.15s; }
+  .ps-head .closeb:hover { background: var(--line); color: var(--ink); }
+  .ps-body { flex: 1; overflow-y: auto; padding: 22px 24px; }
+  .ps-foot { background: var(--white); padding: 16px 24px; border-top: 1px solid var(--line); display: flex; gap: 12px; }
+
+  .field { margin-bottom: 18px; }
+  .field label { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; margin-bottom: 7px; }
+  .req { font-size: 10px; font-weight: 700; color: var(--danger); background: rgba(192,57,43,0.10); padding: 1px 6px; border-radius: 4px; }
+  .auto-badge { font-size: 10px; font-weight: 700; color: #8a7000; background: rgba(248,212,35,0.25); padding: 1px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; }
+  .field input[type=text], .field input[type=url], .field textarea, .field select {
+    width: 100%; font-family: inherit; font-size: 13.5px; color: var(--ink); background: var(--white);
+    border: 1.5px solid var(--line); border-radius: 9px; padding: 11px 13px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(248,212,35,0.22); }
+  .field .hint { font-size: 11px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 5px; }
+  .url-wrap { position: relative; }
+  .url-loading { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 7px; font-size: 11px; color: #8a7000; font-weight: 700; }
+  .spinner { width: 15px; height: 15px; border: 2.5px solid rgba(248,212,35,0.4); border-top-color: #C9A100; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .url-ok { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--ok); }
+  .field-half-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .pub-toggle-row { display: flex; align-items: center; justify-content: space-between; background: var(--white); border: 1.5px solid var(--line); border-radius: 9px; padding: 13px 15px; }
+  .pub-toggle-row .pt-l { font-size: 13px; font-weight: 700; }
+  .pub-toggle-row .pt-s { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .thumb-preview { width: 100%; height: 120px; border-radius: 9px; background: var(--field); border: 1.5px dashed var(--line); display: grid; place-items: center; margin-top: 8px; position: relative; overflow: hidden; }
+  .thumb-preview .ph-label { font-family: ui-monospace, monospace; font-size: 11px; color: var(--muted); }
+  .btn-save { flex: 1; font-family: inherit; font-size: 14px; font-weight: 900; color: var(--ink); background: var(--accent); border: none; border-radius: 10px; padding: 13px; cursor: pointer; box-shadow: 0 3px 10px rgba(248,212,35,0.4); transition: all 0.15s; }
+  .btn-save:hover { background: var(--accent-press); }
+  .btn-cancel { font-family: inherit; font-size: 14px; font-weight: 700; color: var(--ink); background: var(--white); border: 1.5px solid var(--line); border-radius: 10px; padding: 13px 24px; cursor: pointer; transition: all 0.15s; }
+  .btn-cancel:hover { background: var(--field); border-color: var(--muted); }
+
+  /* toast */
+  .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px); background: var(--navy); color: var(--white); font-size: 13px; font-weight: 500; padding: 13px 22px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.22); opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s; z-index: 60; display: flex; align-items: center; gap: 9px; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast .tk { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+const { useState, useMemo, useRef } = React;
+
+function Icon({ children, size = 18 }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
+}
+
+const NAV = [
+  { key: "dash", label: "ダッシュボード", icon: <path d="M3 13h8V3H3zM13 21h8V11h-8zM13 3v6h8V3zM3 21h8v-6H3z"/> },
+  { key: "users", label: "ユーザー管理", icon: <g><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></g>, badge: 3 },
+  { key: "articles", label: "記事管理", icon: <g><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></g> },
+  { key: "pdf", label: "PDF管理", icon: <g><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></g> },
+  { key: "cat", label: "カテゴリ管理", icon: <g><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></g> },
+  { key: "stats", label: "統計", icon: <g><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></g> },
+];
+
+const CATS = {
+  self: "自己分析", shukatsu: "就活対策", career: "キャリア設計", mind: "マインドセット",
+};
+const CATCLS = { self: "cat-self", shukatsu: "cat-shukatsu", career: "cat-career", mind: "cat-mind" };
+
+function mk(id, title, cat, tags, pub, slug, date) {
+  return { id, title, cat, tags, pub, url: "note.com/jibunzemi/n/" + slug, date };
+}
+const INITIAL = [
+  mk(1, "「やりたいこと」が見つからない人のための自己分析フレーム", "self", ["自己分析", "価値観"], true, "a1b2c3", "6/5"),
+  mk(2, "強みは「経験」ではなく「再現性」で語る｜自己PRの設計図", "self", ["自己PR", "強み"], true, "d4e5f6", "6/4"),
+  mk(3, "通過するガクチカの作り方｜結論ファーストの型", "shukatsu", ["ES", "ガクチカ"], true, "g7h8i9", "6/3"),
+  mk(4, "逆質問で差をつける｜面接官が評価する5つの質問", "shukatsu", ["面接", "逆質問"], false, "j1k2l3", "6/1"),
+  mk(5, "20代でやっておくべきキャリアの棚卸し", "career", ["キャリア"], true, "m4n5o6", "5/30"),
+  mk(6, "比べない技術｜SNS時代の就活メンタル管理", "mind", ["メンタル"], false, "p7q8r9", "5/28"),
+  mk(7, "価値観カードで見つける、譲れない3つの軸", "self", ["価値観", "ワーク"], true, "s1t2u3", "5/18"),
+];
+
+// Mock auto-complete title from a note URL
+const MOCK_TITLES = [
+  "noteから取得した記事タイトルがここに入ります",
+  "自己分析で見つける「自分の取扱説明書」の作り方",
+  "面接前夜にやるべき5つの準備リスト",
+];
+
+function App() {
+  const [articles, setArticles] = useState(INITIAL);
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [toast, setToast] = useState("");
+  // form state
+  const [form, setForm] = useState({ url: "", title: "", desc: "", thumb: "", cat: "self", tags: "", pdf: "", pub: false });
+  const [urlState, setUrlState] = useState("idle"); // idle | loading | done
+  const fetchTimer = useRef(null);
+
+  function flash(msg) { setToast(msg); clearTimeout(window._t); window._t = setTimeout(() => setToast(""), 2200); }
+
+  const filtered = useMemo(() =>
+    articles.filter(a => q.trim() === "" || a.title.includes(q.trim()) || a.tags.some(t => t.includes(q.trim()))),
+    [articles, q]);
+  const pubCount = articles.filter(a => a.pub).length;
+
+  function togglePub(id) {
+    setArticles(as => as.map(a => a.id === id ? { ...a, pub: !a.pub } : a));
+    const a = articles.find(x => x.id === id);
+    flash(a.pub ? "「" + trunc(a.title) + "」を非公開にしました" : "「" + trunc(a.title) + "」を公開しました");
+  }
+  function trunc(s) { return s.length > 14 ? s.slice(0, 14) + "…" : s; }
+
+  function openNew() {
+    setEditId(null);
+    setForm({ url: "", title: "", desc: "", thumb: "", cat: "self", tags: "", pdf: "", pub: false });
+    setUrlState("idle");
+    setOpen(true);
+  }
+  function openEdit(a) {
+    setEditId(a.id);
+    setForm({ url: "https://" + a.url, title: a.title, desc: "", thumb: "", cat: a.cat, tags: a.tags.join(", "), pdf: "", pub: a.pub });
+    setUrlState("done");
+    setOpen(true);
+  }
+  function close() { setOpen(false); }
+
+  function onUrlChange(v) {
+    setForm(f => ({ ...f, url: v }));
+    clearTimeout(fetchTimer.current);
+    // simulate auto title fetch when URL looks like a note URL
+    if (/note\.com|note\.mu/.test(v) && v.length > 18) {
+      setUrlState("loading");
+      fetchTimer.current = setTimeout(() => {
+        const title = editId ? form.title : MOCK_TITLES[Math.floor(Math.random() * MOCK_TITLES.length)];
+        setForm(f => ({ ...f, title: f.title || title }));
+        setUrlState("done");
+      }, 1400);
+    } else {
+      setUrlState("idle");
+    }
+  }
+
+  function save() {
+    if (!form.url.trim()) { flash("noteURLを入力してください"); return; }
+    if (editId) {
+      setArticles(as => as.map(a => a.id === editId ? {
+        ...a, title: form.title || a.title, cat: form.cat,
+        tags: form.tags.split(",").map(t => t.trim()).filter(Boolean), pub: form.pub,
+        url: form.url.replace(/^https?:\/\//, "")
+      } : a));
+      flash("記事を更新しました");
+    } else {
+      const id = Math.max(0, ...articles.map(a => a.id)) + 1;
+      setArticles(as => [{
+        id, title: form.title || "（無題の記事）", cat: form.cat,
+        tags: form.tags.split(",").map(t => t.trim()).filter(Boolean), pub: form.pub,
+        url: form.url.replace(/^https?:\/\//, ""), date: "今日"
+      }, ...as]);
+      flash("記事を追加しました");
+    }
+    setOpen(false);
+  }
+  function del(a) {
+    setArticles(as => as.filter(x => x.id !== a.id));
+    flash("「" + trunc(a.title) + "」を削除しました");
+  }
+
+  return (
+    <div className="shell">
+      <aside className="sidebar">
+        <div className="sb-brand">
+          <div className="mark"><span>ジ</span></div>
+          <div className="t"><div className="n">ジブンゼミ</div><div className="s">ADMIN</div></div>
+        </div>
+        <nav className="sb-nav">
+          <div className="sb-label">メニュー</div>
+          {NAV.map(n => (
+            <button key={n.key} className={"sb-item" + (n.key === "articles" ? " active" : "")} onClick={()=>{}}>
+              <Icon>{n.icon}</Icon>{n.label}
+              {n.badge && <span className="badge">{n.badge}</span>}
+            </button>
+          ))}
+        </nav>
+        <div className="sb-foot">
+          <div className="sb-user"><div className="av">ご</div><div className="u"><div className="un">ごっちん</div><div className="ur">管理者</div></div></div>
+        </div>
+      </aside>
+
+      <main className="main">
+        <div className="topbar">
+          <div><h1>記事管理</h1><div className="sub">記事の追加・編集・公開管理を行います</div></div>
+          <button className="btn-add" onClick={openNew}>
+            <Icon size={16}><g><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></g></Icon>
+            記事を追加
+          </button>
+        </div>
+
+        <div className="toolbar">
+          <div className="stat-line">全 <b>{articles.length}</b> 本　公開中 <b>{pubCount}</b> 本　下書き <b>{articles.length - pubCount}</b> 本</div>
+          <div className="search-wrap">
+            <span className="s-icon"><Icon size={17}><g><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></g></Icon></span>
+            <input className="search-input" type="text" placeholder="タイトル・タグで検索" value={q} onChange={e => setQ(e.target.value)} />
+          </div>
+        </div>
+
+        <div className="panel">
+          <table>
+            <thead>
+              <tr>
+                <th>タイトル</th><th>カテゴリ</th><th>タグ</th><th>公開状態</th><th>note連携URL</th><th>作成日</th><th style={{textAlign:"right"}}>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr className="empty-row"><td colSpan="7">該当する記事がありません</td></tr>
+              ) : filtered.map(a => (
+                <tr key={a.id}>
+                  <td><div className="a-title">{a.title}</div></td>
+                  <td><span className={"cat-tag " + CATCLS[a.cat]}>{CATS[a.cat]}</span></td>
+                  <td><div className="tags">{a.tags.map((t, i) => <span className="tag" key={i}>{t}</span>)}</div></td>
+                  <td>
+                    <div className={"toggle" + (a.pub ? " on" : "")} onClick={() => togglePub(a.id)}>
+                      <span className="switch"></span><span className="tl">{a.pub ? "公開" : "非公開"}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <a className="note-url" href="#" onClick={e=>e.preventDefault()}>
+                      <Icon size={12}><g><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></g></Icon>
+                      <span className="nt">{a.url}</span>
+                    </a>
+                  </td>
+                  <td><span className="date-c">{a.date}</span></td>
+                  <td>
+                    <div className="row-actions">
+                      <button className="ab edit" onClick={() => openEdit(a)}>
+                        <Icon size={12}><g><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></g></Icon>編集
+                      </button>
+                      <button className="ab del" onClick={() => del(a)}>
+                        <Icon size={12}><g><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></g></Icon>削除
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
+
+      {/* Side panel */}
+      <div className={"overlay" + (open ? " show" : "")} onClick={close}></div>
+      <div className={"panel-side" + (open ? " show" : "")}>
+        <div className="ps-head">
+          <h2>{editId ? "記事を編集" : "記事を追加"}</h2>
+          <button className="closeb" onClick={close}><Icon size={17}><g><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></g></Icon></button>
+        </div>
+        <div className="ps-body">
+          {/* note URL first */}
+          <div className="field">
+            <label>note URL <span className="req">必須</span></label>
+            <div className="url-wrap">
+              <input type="url" placeholder="https://note.com/jibunzemi/n/xxxxxx" value={form.url} onChange={e => onUrlChange(e.target.value)} />
+              {urlState === "loading" && <span className="url-loading"><span className="spinner"></span>取得中</span>}
+              {urlState === "done" && <span className="url-ok"><Icon size={17}><polyline points="20 6 9 17 4 12"/></Icon></span>}
+            </div>
+            <div className="hint">
+              <Icon size={13}><g><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></g></Icon>
+              URLを貼り付けるとタイトルを自動で取得します
+            </div>
+          </div>
+
+          {/* title auto-filled */}
+          <div className="field">
+            <label>
+              タイトル
+              {urlState === "done" && <span className="auto-badge"><Icon size={10}><polyline points="20 6 9 17 4 12"/></Icon>自動取得</span>}
+            </label>
+            <input type="text" placeholder={urlState === "loading" ? "noteから取得しています…" : "noteURLを入力すると自動補完されます"} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
+          </div>
+
+          <div className="field">
+            <label>紹介文（リード文）</label>
+            <textarea placeholder="2〜4行程度の紹介文を入力します" value={form.desc} onChange={e => setForm(f => ({ ...f, desc: e.target.value }))}></textarea>
+          </div>
+
+          <div className="field">
+            <label>サムネイル画像URL</label>
+            <input type="url" placeholder="https://..." value={form.thumb} onChange={e => setForm(f => ({ ...f, thumb: e.target.value }))} />
+            <div className="thumb-preview"><span className="ph-label">サムネイルプレビュー</span></div>
+          </div>
+
+          <div className="field-half-row">
+            <div className="field">
+              <label>カテゴリ</label>
+              <select value={form.cat} onChange={e => setForm(f => ({ ...f, cat: e.target.value }))}>
+                {Object.entries(CATS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              </select>
+            </div>
+            <div className="field">
+              <label>PDF紐づけ</label>
+              <select value={form.pdf} onChange={e => setForm(f => ({ ...f, pdf: e.target.value }))}>
+                <option value="">なし</option>
+                <option value="p1">心が動いた瞬間ワークシート</option>
+                <option value="p2">自己PR設計シート</option>
+                <option value="p3">キャリアの棚卸しテンプレート</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="field">
+            <label>タグ（カンマ区切り）</label>
+            <input type="text" placeholder="自己分析, 価値観, ワーク" value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} />
+          </div>
+
+          <div className="field">
+            <label>公開設定</label>
+            <div className="pub-toggle-row">
+              <div><div className="pt-l">この記事を公開する</div><div className="pt-s">オフの場合は下書きとして保存されます</div></div>
+              <div className={"toggle" + (form.pub ? " on" : "")} onClick={() => setForm(f => ({ ...f, pub: !f.pub }))}>
+                <span className="switch"></span><span className="tl">{form.pub ? "公開" : "下書き"}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="ps-foot">
+          <button className="btn-cancel" onClick={close}>キャンセル</button>
+          <button className="btn-save" onClick={save}>{editId ? "更新する" : "記事を追加"}</button>
+        </div>
+      </div>
+
+      <div className={"toast" + (toast ? " show" : "")}>
+        <span className="tk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1A3A6B" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        {toast}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
